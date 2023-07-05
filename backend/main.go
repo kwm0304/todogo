@@ -44,3 +44,20 @@ func main() {
 	log.Println("Server started on localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
+
+//gin.Context encapsulates the req and res for requests
+func createTask(c *gin.Context) {
+
+}
+
+func getTasks(c *gin.Context) {
+
+}
+
+func updateTask(c *gin.Context) {
+
+}
+
+func deleteTask(c *gin.Context) {
+	
+}
