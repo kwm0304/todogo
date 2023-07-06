@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,8 +18,11 @@ type Task struct {
 	UserId		uint
 }
 
+var db *gorm.DB
+
 func main() {
 	//connect to db
+	var err error
 	db, err := gorm.Open("sqlite3", "todo.db")
 	if err != nil {
 		log.Fatal("Unable to connect to db:", err)
@@ -47,15 +51,71 @@ func main() {
 
 //gin.Context encapsulates the req and res for requests
 func createTask(c *gin.Context) {
-
+	var task Task
+	if err := c.ShouldBindJSON(&task); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
+	if err := db.Create(&task).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, task)
 }
 
+//getALL
 func getTasks(c *gin.Context) {
+	var tasks []Task
+	if err := db.Find(&tasks).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, tasks)
+}
 
+//getOne
+func getTask(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error" : err.Error()})
+		return
+	}
+
+	var task Task
+	if err := db.First(&task, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"Error" : "Task not found"})
+		return
+	}
+	c.JSON(http.StatusOK, task)
 }
 
 func updateTask(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
 
+	var task Task
+	if err := db.First(&task, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"Error": "Task not found"})
+		return
+	}
+
+	var updatedTask Task
+	if err := c.ShouldBindJSON(&updatedTask); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
+
+	task.Title = updatedTask.Title
+	task.Completed = updatedTask.Completed
+
+	if err := db.Save(&task).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, task)
 }
 
 func deleteTask(c *gin.Context) {
