@@ -1,7 +1,13 @@
+import Details from "./Details"
 
 const ListPage = () => {
   return (
-    <div>ListPage</div>
+    
+    <div className="bg-gray-200">
+      <Details />
+    </div>
+    
+    
   )
 }
 
