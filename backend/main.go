@@ -7,7 +7,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	- "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 type Task struct {
@@ -59,5 +59,5 @@ func updateTask(c *gin.Context) {
 }
 
 func deleteTask(c *gin.Context) {
-	
+
 }
